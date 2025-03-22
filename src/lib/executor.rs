@@ -3,26 +3,15 @@ use std::net::TcpStream;
 
 use ssh2::Session;
 
-use crate::config::SshConfig;
-use crate::error::SshRemoteExecError;
+use crate::model::SshRemoteExecError;
+use crate::model::{SshConfig, SshSessionIdentifier};
 
-pub struct SshSessionIdentifier {
-    pub host: String,
-    pub session: Session,
-}
-
-impl SshSessionIdentifier {
-    pub fn new(host: String, session: Session) -> Self {
-        Self { host, session }
-    }
-}
-
-pub struct SshManager {
+pub struct SshExecutor {
     config: SshConfig,
     sessions: Vec<SshSessionIdentifier>,
 }
 
-impl SshManager {
+impl SshExecutor {
 
     pub fn new(config: SshConfig) -> Self {
         Self {

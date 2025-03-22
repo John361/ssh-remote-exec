@@ -1,7 +1,7 @@
 use std::path::PathBuf;
 
-use lib::config::SshConfig;
-use lib::ssh::SshManager;
+use lib::executor::SshExecutor;
+use lib::model::SshConfig;
 
 fn main() {
     init_tracing();
@@ -13,7 +13,7 @@ fn main() {
         private_key: PathBuf::from("tmp/id_ed25519"),
     };
 
-    let mut manager = SshManager::new(config);
+    let mut manager = SshExecutor::new(config);
     manager.connect().unwrap();
 
     let results = manager.execute_command("apt update").unwrap();
