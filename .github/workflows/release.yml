@@ -4,6 +4,11 @@ on:
         tags:
             - v[0-9]+.*
     workflow_dispatch:
+        inputs:
+            version:
+                type: string
+                description: "The version to deploy"
+                required: true
 
 permissions:
     contents: write
