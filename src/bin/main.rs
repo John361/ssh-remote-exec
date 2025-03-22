@@ -12,7 +12,7 @@ fn main() {
     manager.connect().unwrap();
 
     let results = manager.execute_command(&args.command).unwrap();
-    results.iter().for_each(|r| println!("{}", r));
+    results.iter().for_each(|r| println!("{}", r.result));
 
     manager.disconnect().unwrap();
 }

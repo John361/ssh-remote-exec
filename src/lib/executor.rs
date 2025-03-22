@@ -3,7 +3,7 @@ use std::net::TcpStream;
 
 use ssh2::Session;
 
-use crate::model::SshRemoteExecError;
+use crate::model::{SshCommandResult, SshCommandResultStatus, SshRemoteExecError};
 use crate::model::{SshConfig, SshSessionIdentifier};
 
 pub struct SshExecutor {
@@ -71,7 +71,7 @@ impl SshExecutor {
         Ok(())
     }
 
-    pub fn execute_command(&self, command: &str) -> Result<Vec<String>, SshRemoteExecError> {
+    pub fn execute_command(&self, command: &str) -> Result<Vec<SshCommandResult>, SshRemoteExecError> {
         if self.sessions.is_empty() {
             let e = SshRemoteExecError::RemoteCommandExecution("No existing session found".to_string());
             tracing::error!("{e:}");
@@ -116,16 +116,17 @@ impl SshExecutor {
                 .inspect(|_| tracing::debug!("Channel exit status read"))
                 .inspect_err(|e| tracing::error!("{e:}"))?;
 
-            let mut result = String::new();
-
             if status != 0 {
-                result = format!("[{}] Command failed with status {}\n{}", session.host, status, stderr);
+                let result_message = format!("[{}] Command failed with status {}\n{}", session.host, status, stderr);
+                let result = SshCommandResult::new(session.host.clone(), result_message, SshCommandResultStatus::Error);
 
+                results.push(result);
             } else {
-                result = format!("[{}]\n{result:}", session.host);
-            }
+                let result_message = format!("[{}]\n{stdout:}", session.host);
+                let result = SshCommandResult::new(session.host.clone(), result_message, SshCommandResultStatus::Success);
 
-            results.push(result);
+                results.push(result);
+            }
         }
 
         Ok(results)

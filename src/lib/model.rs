@@ -14,6 +14,23 @@ impl SshSessionIdentifier {
     }
 }
 
+pub struct SshCommandResult {
+    pub host: String,
+    pub result: String,
+    pub status: SshCommandResultStatus,
+}
+
+impl SshCommandResult {
+    pub fn new(host: String, result: String, status: SshCommandResultStatus) -> Self {
+        Self { host, result, status }
+    }
+}
+
+pub enum SshCommandResultStatus {
+    Success,
+    Error,
+}
+
 pub struct SshConfig {
     pub hosts: Vec<String>,
     pub username: String,
