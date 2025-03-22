@@ -24,27 +24,27 @@ impl SshExecutor {
         for host in &self.config.hosts {
             let tcp = TcpStream::connect(host)
                 .map_err(|e| SshRemoteExecError::RemoteConnection(e.to_string()))
-                .inspect(|_| tracing::debug!("TCP connection established"))
-                .inspect_err(|e| tracing::error!("{e:}"))?;
+                .inspect(|_| tracing::debug!("[{host:}] TCP connection established"))
+                .inspect_err(|e| tracing::error!("[{host:}] {e:}"))?;
 
             let mut session = Session::new()
                 .map_err(|e| SshRemoteExecError::RemoteConnection(e.to_string()))
-                .inspect(|_| tracing::debug!("Session established"))
-                .inspect_err(|e| tracing::error!("{e:}"))?;
+                .inspect(|_| tracing::debug!("[{host:}] Session established"))
+                .inspect_err(|e| tracing::error!("[{host:}] {e:}"))?;
 
             session.set_tcp_stream(tcp);
             session.handshake()
                 .map_err(|e| SshRemoteExecError::RemoteConnection(e.to_string()))
-                .inspect(|_| tracing::debug!("Session handshake realized"))
-                .inspect_err(|e| tracing::error!("{e:}"))?;
+                .inspect(|_| tracing::debug!("[{host:}] Session handshake realized"))
+                .inspect_err(|e| tracing::error!("[{host:}] {e:}"))?;
 
             session.userauth_pubkey_file(&self.config.username,
                                          Some(self.config.public_key.as_path()),
                                          self.config.private_key.as_path(),
                                          None)
                 .map_err(|e| SshRemoteExecError::RemoteConnection(e.to_string()))
-                .inspect(|_| tracing::debug!("Session authenticated"))
-                .inspect_err(|e| tracing::error!("{e:}"))?;
+                .inspect(|_| tracing::debug!("[{host:}] Session authenticated"))
+                .inspect_err(|e| tracing::error!("[{host:}] {e:}"))?;
 
             self.sessions.push(SshSessionIdentifier::new(host.clone(), session));
         }
@@ -63,8 +63,8 @@ impl SshExecutor {
         for session in &self.sessions {
             session.session.disconnect(None, "", None)
                 .map_err(|e| SshRemoteExecError::RemoteConnection(e.to_string()))
-                .inspect(|_| tracing::debug!("Session disconnected"))
-                .inspect_err(|e| tracing::error!("{e:}"))?;
+                .inspect(|_| tracing::debug!("[{}] Session disconnected", session.host))
+                .inspect_err(|e| tracing::error!("[{}] {e:}", session.host))?;
         }
 
         self.sessions.clear();
@@ -84,37 +84,37 @@ impl SshExecutor {
         for session in &self.sessions {
             let mut channel = session.session.channel_session()
                 .map_err(|e| SshRemoteExecError::RemoteConnection(e.to_string()))
-                .inspect(|_| tracing::debug!("Channel session established"))
-                .inspect_err(|e| tracing::error!("{e:}"))?;
+                .inspect(|_| tracing::debug!("[{}] Channel session established", session.host))
+                .inspect_err(|e| tracing::error!("[{}] {e:}", session.host))?;
 
             channel.exec(command)
                 .map_err(|e| SshRemoteExecError::RemoteConnection(e.to_string()))
-                .inspect(|_| tracing::debug!("Remote command executed"))
-                .inspect_err(|e| tracing::error!("{e:}"))?;
+                .inspect(|_| tracing::debug!("[{}] Remote command executed", session.host))
+                .inspect_err(|e| tracing::error!("[{}] {e:}", session.host))?;
 
             let mut stdout = String::new();
             let mut stderr = String::new();
 
             channel.read_to_string(&mut stdout)
                 .map_err(|e| SshRemoteExecError::RemoteConnection(e.to_string()))
-                .inspect(|_| tracing::debug!("Remote command result read"))
-                .inspect_err(|e| tracing::error!("{e:}"))?;
+                .inspect(|_| tracing::debug!("[{}] Remote command result read", session.host))
+                .inspect_err(|e| tracing::error!("[{}] {e:}", session.host))?;
 
             channel.stderr().read_to_string(&mut stderr)
                 .map_err(|e| SshRemoteExecError::RemoteConnection(e.to_string()))
-                .inspect(|_| tracing::debug!("Remote command result read"))
-                .inspect_err(|e| tracing::error!("{e:}"))
+                .inspect(|_| tracing::debug!("[{}] Remote command result read", session.host))
+                .inspect_err(|e| tracing::error!("[{}] {e:}", session.host))
                 .ok();
 
             channel.wait_close()
                 .map_err(|e| SshRemoteExecError::RemoteConnection(e.to_string()))
-                .inspect(|_| tracing::debug!("Channel session closed"))
-                .inspect_err(|e| tracing::error!("{e:}"))?;
+                .inspect(|_| tracing::debug!("[{}] Channel session closed", session.host))
+                .inspect_err(|e| tracing::error!("[{}] {e:}", session.host))?;
 
             let status = channel.exit_status()
                 .map_err(|e| SshRemoteExecError::RemoteConnection(e.to_string()))
-                .inspect(|_| tracing::debug!("Channel exit status read"))
-                .inspect_err(|e| tracing::error!("{e:}"))?;
+                .inspect(|_| tracing::debug!("[{}] Channel exit status read", session.host))
+                .inspect_err(|e| tracing::error!("[{}] {e:}", session.host))?;
 
             if status != 0 {
                 let result_message = format!("[{}] Command failed with status {}\n{}", session.host, status, stderr);
