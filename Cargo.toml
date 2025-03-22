@@ -18,8 +18,7 @@ path = "src/lib/lib.rs"
 [dependencies]
 clap = { version = "4.5.32", features = ["derive"] }
 config = { version = "0.15.11", features = ["yaml"] }
-openssl = "0.10.71"
-ssh2 = "0.9.5"
+ssh2 = { version = "0.9.5", features = ["vendored-openssl"] }
 thiserror = "2.0.12"
 tracing = "0.1.41"
 tracing-subscriber = { version = "0.3.19", features = ["env-filter"] }

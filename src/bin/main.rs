@@ -7,7 +7,7 @@ fn main() {
     init_tracing();
 
     let config = SshConfig {
-        host: "192.168.132.133:22".to_string(),
+        hosts: vec!["192.168.132.133:22".to_string(), "192.168.132.133:22".to_string()],
         username: "root".to_string(),
         public_key: PathBuf::from("tmp/id_ed25519.pub"),
         private_key: PathBuf::from("tmp/id_ed25519"),
@@ -16,8 +16,8 @@ fn main() {
     let mut manager = SshManager::new(config);
     manager.connect().unwrap();
 
-    let result = manager.execute_command("apt update").unwrap();
-    println!("{}", result);
+    let results = manager.execute_command("apt update").unwrap();
+    results.iter().for_each(|r| println!("{}", r));
 
     manager.disconnect().unwrap();
 }
