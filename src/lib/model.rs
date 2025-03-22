@@ -22,12 +22,15 @@ pub struct SshConfig {
 }
 
 impl SshConfig {
-    pub fn new(hosts: Vec<String>, username: String, public_key: PathBuf, private_key: PathBuf) -> Self {
+    pub fn new(hosts: Vec<String>, username: String, identity: PathBuf) -> Self {
+        let public_key = format!("{}.pub", identity.display());
+        let public_key = PathBuf::from(&public_key);
+
         Self {
             hosts,
             username,
             public_key,
-            private_key,
+            private_key: identity,
         }
     }
 }

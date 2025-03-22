@@ -2,21 +2,21 @@
 Execute remote ssh commands on multiple hosts
 
 # Usage
+- Hosts may be specified multiple time when working with multiple hosts
+- Public key must be at the same place of the private key and have .pub extension
+
 ```
-Usage: ssh-remote-exec --hosts <HOSTS> --username <USERNAME> --public-key <PUBLIC_KEY> --private-key <PRIVATE_KEY>
+Usage: ssh-remote-exec --hosts <HOSTS> --username <USERNAME> --identity <IDENTITY>
 
 Options:
-  -H, --hosts <HOSTS>              Required - Hosts
-  -U, --username <USERNAME>        Required - Username
-  -P, --public-key <PUBLIC_KEY>    Required - Public key
-  -K, --private-key <PRIVATE_KEY>  Required - Private key
-  -h, --help                       Print help
-  -V, --version                    Print version
+  -H, --hosts <HOSTS>        Required - Hosts
+  -U, --username <USERNAME>  Required - Username
+  -I, --identity <IDENTITY>  Required - Identity file (Private key)
+  -h, --help                 Print help
+  -V, --version              Print version
 ```
-
-Hosts may be specified multiple time when working with multiple hosts
 
 Example:
 ```shell
-ssh-remote-exec -H 192.168.132.133:22 -H 192.168.132.133:22 -U root -P tmp/id_ed25519.pub -K tmp/id_ed25519
+ssh-remote-exec -H 192.168.132.133:22 -H 192.168.132.133:22 -U root -I tmp/id_ed25519
 ```

@@ -12,11 +12,8 @@ pub struct Cli {
     #[arg(long, short = 'U', help = "Required - Username", required = true)]
     pub username: String,
 
-    #[arg(long, short = 'P', help = "Required - Public key", required = true)]
-    pub public_key: PathBuf,
-
-    #[arg(long, short = 'K', help = "Required - Private key", required = true)]
-    pub private_key: PathBuf,
+    #[arg(long, short = 'I', help = "Required - Identity file (Private key)", required = true)]
+    pub identity: PathBuf,
 }
 
 impl Cli {
