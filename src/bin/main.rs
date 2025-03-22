@@ -6,7 +6,7 @@ fn main() {
     init_tracing();
 
     let args = Cli::load();
-    let config = SshConfig::new(args.hosts, args.username, args.identity);
+    let config = SshConfig::new(args.hosts, args.username, args.password, args.identity);
 
     let mut manager = SshExecutor::new(config);
     manager.connect().unwrap();

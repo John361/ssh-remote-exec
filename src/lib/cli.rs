@@ -17,6 +17,9 @@ pub struct Cli {
 
     #[arg(long, short = 'C', help = "Required - Command", required = true)]
     pub command: String,
+
+    #[arg(long, short = 'P', help = "Optional - Password", required = false, default_value = "")]
+    pub password: String,
 }
 
 impl Cli {

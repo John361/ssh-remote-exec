@@ -44,18 +44,20 @@ pub enum SshCommandResultStatus {
 pub struct SshConfig {
     pub hosts: Vec<String>,
     pub username: String,
+    pub password: String,
     pub public_key: PathBuf,
     pub private_key: PathBuf,
 }
 
 impl SshConfig {
-    pub fn new(hosts: Vec<String>, username: String, identity: PathBuf) -> Self {
+    pub fn new(hosts: Vec<String>, username: String, password: String, identity: PathBuf) -> Self {
         let public_key = format!("{}.pub", identity.display());
         let public_key = PathBuf::from(&public_key);
 
         Self {
             hosts,
             username,
+            password,
             public_key,
             private_key: identity,
         }
