@@ -11,7 +11,7 @@ fn main() {
     let mut manager = SshExecutor::new(config);
     manager.connect().unwrap();
 
-    let results = manager.execute_command(&args.command).unwrap();
+    let results = manager.execute_command(args.command.to_string()).unwrap();
     results.iter().for_each(|r| r.print());
 
     manager.disconnect().unwrap();

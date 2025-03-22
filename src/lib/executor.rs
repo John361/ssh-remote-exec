@@ -71,12 +71,17 @@ impl SshExecutor {
         Ok(())
     }
 
-    pub fn execute_command(&self, command: &str) -> Result<Vec<SshCommandResult>, SshRemoteExecError> {
+    pub fn execute_command(&self, mut command: String) -> Result<Vec<SshCommandResult>, SshRemoteExecError> {
         if self.sessions.is_empty() {
             let e = SshRemoteExecError::RemoteCommandExecution("No existing session found".to_string());
             tracing::error!("{e:}");
 
             return Err(e);
+        }
+
+        if command.contains("sudo") {
+            command = command.replace("sudo", "");
+            command = format!("echo {} | sudo -S {}", self.config.password, command);
         }
 
         let mut results = Vec::new();
@@ -87,7 +92,7 @@ impl SshExecutor {
                 .inspect(|_| tracing::debug!("[{}] Channel session established", session.host))
                 .inspect_err(|e| tracing::error!("[{}] {e:}", session.host))?;
 
-            channel.exec(command)
+            channel.exec(&command)
                 .map_err(|e| SshRemoteExecError::RemoteConnection(e.to_string()))
                 .inspect(|_| tracing::debug!("[{}] Remote command executed", session.host))
                 .inspect_err(|e| tracing::error!("[{}] {e:}", session.host))?;
