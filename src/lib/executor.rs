@@ -92,18 +92,39 @@ impl SshExecutor {
                 .inspect(|_| tracing::debug!("Remote command executed"))
                 .inspect_err(|e| tracing::error!("{e:}"))?;
 
-            let mut result = String::new();
-            channel.read_to_string(&mut result)
+            let mut stdout = String::new();
+            let mut stderr = String::new();
+
+            channel.read_to_string(&mut stdout)
                 .map_err(|e| SshRemoteExecError::RemoteConnection(e.to_string()))
                 .inspect(|_| tracing::debug!("Remote command result read"))
                 .inspect_err(|e| tracing::error!("{e:}"))?;
+
+            channel.stderr().read_to_string(&mut stderr)
+                .map_err(|e| SshRemoteExecError::RemoteConnection(e.to_string()))
+                .inspect(|_| tracing::debug!("Remote command result read"))
+                .inspect_err(|e| tracing::error!("{e:}"))
+                .ok();
 
             channel.wait_close()
                 .map_err(|e| SshRemoteExecError::RemoteConnection(e.to_string()))
                 .inspect(|_| tracing::debug!("Channel session closed"))
                 .inspect_err(|e| tracing::error!("{e:}"))?;
 
-            result = format!("[{}]\n{result:}", session.host);
+            let status = channel.exit_status()
+                .map_err(|e| SshRemoteExecError::RemoteConnection(e.to_string()))
+                .inspect(|_| tracing::debug!("Channel exit status read"))
+                .inspect_err(|e| tracing::error!("{e:}"))?;
+
+            let mut result = String::new();
+
+            if status != 0 {
+                result = format!("[{}] Command failed with status {}\n{}", session.host, status, stderr);
+
+            } else {
+                result = format!("[{}]\n{result:}", session.host);
+            }
+
             results.push(result);
         }
 
