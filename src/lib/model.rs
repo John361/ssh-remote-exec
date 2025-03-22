@@ -1,5 +1,6 @@
 use std::path::PathBuf;
 
+use colored::Colorize;
 use ssh2::Session;
 use thiserror::Error;
 
@@ -23,6 +24,15 @@ pub struct SshCommandResult {
 impl SshCommandResult {
     pub fn new(host: String, result: String, status: SshCommandResultStatus) -> Self {
         Self { host, result, status }
+    }
+
+    pub fn print(&self) {
+        println!("[{}]", self.host.blue());
+
+        match self.status {
+            SshCommandResultStatus::Success => println!("{}", self.result.green()),
+            SshCommandResultStatus::Error => println!("{}", self.result.red()),
+        }
     }
 }
 

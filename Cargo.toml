@@ -17,6 +17,7 @@ path = "src/lib/lib.rs"
 
 [dependencies]
 clap = { version = "4.5.32", features = ["derive"] }
+colored = "3.0.0"
 ssh2 = { version = "0.9.5", features = ["vendored-openssl"] }
 thiserror = "2.0.12"
 tracing = "0.1.41"

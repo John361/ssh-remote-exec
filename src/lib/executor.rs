@@ -117,14 +117,10 @@ impl SshExecutor {
                 .inspect_err(|e| tracing::error!("[{}] {e:}", session.host))?;
 
             if status != 0 {
-                let result_message = format!("[{}] Command failed with status {}\n{}", session.host, status, stderr);
-                let result = SshCommandResult::new(session.host.clone(), result_message, SshCommandResultStatus::Error);
-
+                let result = SshCommandResult::new(session.host.clone(), stderr, SshCommandResultStatus::Error);
                 results.push(result);
             } else {
-                let result_message = format!("[{}]\n{stdout:}", session.host);
-                let result = SshCommandResult::new(session.host.clone(), result_message, SshCommandResultStatus::Success);
-
+                let result = SshCommandResult::new(session.host.clone(), stdout, SshCommandResultStatus::Success);
                 results.push(result);
             }
         }
