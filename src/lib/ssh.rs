@@ -6,9 +6,20 @@ use ssh2::Session;
 use crate::config::SshConfig;
 use crate::error::SshRemoteExecError;
 
+pub struct SshSessionIdentifier {
+    pub host: String,
+    pub session: Session,
+}
+
+impl SshSessionIdentifier {
+    pub fn new(host: String, session: Session) -> Self {
+        Self { host, session }
+    }
+}
+
 pub struct SshManager {
     config: SshConfig,
-    sessions: Vec<Session>,
+    sessions: Vec<SshSessionIdentifier>,
 }
 
 impl SshManager {
@@ -46,7 +57,7 @@ impl SshManager {
                 .inspect(|_| tracing::debug!("Session authenticated"))
                 .inspect_err(|e| tracing::error!("{e:}"))?;
 
-            self.sessions.push(session);
+            self.sessions.push(SshSessionIdentifier::new(host.clone(), session));
         }
 
         Ok(())
@@ -61,7 +72,7 @@ impl SshManager {
         }
 
         for session in &self.sessions {
-            session.disconnect(None, "", None)
+            session.session.disconnect(None, "", None)
                 .map_err(|e| SshRemoteExecError::RemoteConnection(e.to_string()))
                 .inspect(|_| tracing::debug!("Session disconnected"))
                 .inspect_err(|e| tracing::error!("{e:}"))?;
@@ -82,9 +93,7 @@ impl SshManager {
         let mut results = Vec::new();
 
         for session in &self.sessions {
-            // tracing::info!("Executing command on {}", self.config.host); // TODO
-
-            let mut channel = session.channel_session()
+            let mut channel = session.session.channel_session()
                 .map_err(|e| SshRemoteExecError::RemoteConnection(e.to_string()))
                 .inspect(|_| tracing::debug!("Channel session established"))
                 .inspect_err(|e| tracing::error!("{e:}"))?;
@@ -105,6 +114,7 @@ impl SshManager {
                 .inspect(|_| tracing::debug!("Channel session closed"))
                 .inspect_err(|e| tracing::error!("{e:}"))?;
 
+            result = format!("[{}]\n{result:}", session.host);
             results.push(result);
         }
 
