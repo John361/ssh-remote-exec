@@ -11,7 +11,7 @@ fn main() {
     let mut manager = SshExecutor::new(config);
     manager.connect().unwrap();
 
-    let results = manager.execute_command("apt update").unwrap();
+    let results = manager.execute_command(&args.command).unwrap();
     results.iter().for_each(|r| println!("{}", r));
 
     manager.disconnect().unwrap();

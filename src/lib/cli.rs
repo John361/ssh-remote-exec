@@ -14,6 +14,9 @@ pub struct Cli {
 
     #[arg(long, short = 'I', help = "Required - Identity file (Private key)", required = true)]
     pub identity: PathBuf,
+
+    #[arg(long, short = 'C', help = "Required - Command", required = true)]
+    pub command: String,
 }
 
 impl Cli {
