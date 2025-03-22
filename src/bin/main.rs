@@ -1,17 +1,12 @@
-use std::path::PathBuf;
-
+use lib::cli::Cli;
 use lib::executor::SshExecutor;
 use lib::model::SshConfig;
 
 fn main() {
     init_tracing();
 
-    let config = SshConfig {
-        hosts: vec!["192.168.132.133:22".to_string(), "192.168.132.133:22".to_string()],
-        username: "root".to_string(),
-        public_key: PathBuf::from("tmp/id_ed25519.pub"),
-        private_key: PathBuf::from("tmp/id_ed25519"),
-    };
+    let args = Cli::load();
+    let config = SshConfig::new(args.hosts, args.username, args.public_key, args.private_key);
 
     let mut manager = SshExecutor::new(config);
     manager.connect().unwrap();

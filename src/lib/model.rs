@@ -21,6 +21,17 @@ pub struct SshConfig {
     pub private_key: PathBuf,
 }
 
+impl SshConfig {
+    pub fn new(hosts: Vec<String>, username: String, public_key: PathBuf, private_key: PathBuf) -> Self {
+        Self {
+            hosts,
+            username,
+            public_key,
+            private_key,
+        }
+    }
+}
+
 #[derive(Debug, Error)]
 pub enum SshRemoteExecError {
     #[error("Error during remote ssh connection: {0}")]
