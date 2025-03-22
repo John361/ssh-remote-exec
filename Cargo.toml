@@ -1,0 +1,25 @@
+[package]
+name = "ssh-remote-exec"
+version = "0.1.0"
+edition = "2024"
+description = "Execute remote ssh commands on multiple hosts"
+readme = "README.md"
+repository = "https://github.com/John361/ssh-remote-exec"
+categories = ["command-line-utilities", "network-programming"]
+
+[[bin]]
+name = "ssh-remote-exec"
+path = "src/bin/main.rs"
+
+[lib]
+name = "lib"
+path = "src/lib/lib.rs"
+
+[dependencies]
+clap = { version = "4.5.32", features = ["derive"] }
+config = { version = "0.15.11", features = ["yaml"] }
+openssl = "0.10.71"
+ssh2 = "0.9.5"
+thiserror = "2.0.12"
+tracing = "0.1.41"
+tracing-subscriber = { version = "0.3.19", features = ["env-filter"] }
